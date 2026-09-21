@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wildlife Watch · Camera-trap AI</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    :root {
+      --moss: #2f4a3a;
+      --moss-deep: #1f3328;
+      --khaki: #e8e2cf;
+      --paper: #f7f4ea;
+      --ink: #1d1f1a;
+      --muted: #6b7266;
+      --alert: #c8401f;
+      --ok: #3f8f5a;
+      --line: #d5cfb8;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; }
+    body {
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      color: var(--ink);
+      background: var(--paper);
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      grid-template-rows: 100vh;
+    }
+    aside {
+      background: var(--khaki);
+      border-right: 1px solid var(--line);
+      padding: 24px 22px;
+      overflow-y: auto;
+    }
+    h1 { font-size: 20px; margin: 0 0 4px; color: var(--moss-deep); letter-spacing: -0.01em; }
+    .sub { color: var(--muted); font-size: 13px; margin: 0 0 22px; line-height: 1.5; }
+    h2 { font-size: 13px; color: var(--moss); margin: 22px 0 10px; font-weight: 600; }
+    label { display: block; font-size: 13px; margin: 10px 0 4px; }
+    input[type="text"], input[type="number"], select {
+      width: 100%; padding: 8px 10px; font-size: 14px;
+      border: 1px solid var(--line); border-radius: 6px; background: #fff;
+    }
+    input[type="file"] { font-size: 13px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    button {
+      margin-top: 14px; width: 100%; padding: 10px;
+      background: var(--moss); color: #fff; border: 0; border-radius: 6px;
+      font-size: 14px; cursor: pointer;
+    }
+    button:disabled { opacity: .55; cursor: wait; }
+    button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--moss); outline-offset: 2px; }
+    #status { font-size: 13px; margin-top: 10px; min-height: 1.4em; color: var(--muted); }
+    #status.err { color: var(--alert); }
+    .result {
+      margin-top: 10px; padding: 12px; background: #fff; border-radius: 6px;
+      border-left: 4px solid var(--ok); font-size: 13px; line-height: 1.6;
+    }
+    .result.alert { border-left-color: var(--alert); }
+    .result b { font-size: 15px; }
+    .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .stat { background: #fff; border-radius: 6px; padding: 10px 12px; }
+    .stat .n { font-size: 24px; font-weight: 600; color: var(--moss-deep); }
+    .stat .l { font-size: 12px; color: var(--muted); }
+    .stat.alert .n { color: var(--alert); }
+    .species-list { font-size: 13px; line-height: 1.9; }
+    .toggle { display: flex; align-items: center; gap: 8px; font-size: 13px; margin-top: 8px; }
+    .legend { font-size: 12px; color: var(--muted); margin-top: 12px; }
+    .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+    #map { height: 100%; }
+    .leaflet-popup-content { font-size: 13px; line-height: 1.5; }
+    .leaflet-popup-content img { display: block; margin-top: 6px; border-radius: 4px; max-width: 220px; }
+    @media (max-width: 800px) {
+      body { grid-template-columns: 1fr; grid-template-rows: auto 60vh; }
+      aside { border-right: 0; border-bottom: 1px solid var(--line); }
+    }
+  </style>
+</head>
+<body>
+  <aside>
+    <h1>Wildlife Watch</h1>
+    <p class="sub">Upload a camera-trap photo. AI identifies the species and adds the sighting to the map. Frames with a person or vehicle are flagged as alerts.</p>
+
+    <h2>Upload a photo</h2>
+    <form id="uploadForm">
+      <input type="file" name="photo" accept="image/jpeg,image/png,image/webp" required>
+      <label>Camera ID</label>
+      <input type="text" name="camera" placeholder="e.g. CAM-03">
+      <div class="row">
+        <div><label>Latitude</label><input type="number" name="lat" step="any" placeholder="-2.33"></div>
+        <div><label>Longitude</label><input type="number" name="lng" step="any" placeholder="34.83"></div>
+      </div>
+      <p class="sub" style="margin:6px 0 0">Leave blank if the photo has GPS data.</p>
+      <button type="submit" id="submitBtn">Analyze and add to map</button>
+    </form>
+    <div id="status"></div>
+    <div id="lastResult"></div>
+
+    <h2>Statistics</h2>
+    <div class="stats">
+      <div class="stat"><div class="n" id="statTotal">0</div><div class="l">Total sightings</div></div>
+      <div class="stat alert"><div class="n" id="statAlerts">0</div><div class="l">Alerts</div></div>
+    </div>
+    <div class="species-list" id="speciesList"></div>
+
+    <h2>Map view</h2>
+    <select id="speciesFilter">
+      <option value="">All species</option>
+    </select>
+    <label class="toggle">
+      <input type="checkbox" id="publicView">
+      Public view (locations fuzzed to ~10 km, photos hidden)
+    </label>
+    <div class="legend">
+      <span class="dot" style="background:var(--ok)"></span>Animal sighting
+      &nbsp;&nbsp;
+      <span class="dot" style="background:var(--alert)"></span>Alert (person / vehicle)
+    </div>
+  </aside>
+
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const SPECIES_NAMES = {
+      buffalo: "Buffalo", gazellegrants: "Grant's gazelle", gazellethomsons: "Thomson's gazelle", giraffe: "Giraffe",
+      hartebeest: "Hartebeest", hyenaspotted: "Spotted hyena", warthog: "Warthog", zebra: "Zebra", none: "No animal", other: "Other"
+    };
+
+    // ---------- Map setup ----------
+    const map = L.map("map").setView([-2.33, 34.83], 9); // default view: Serengeti
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "&copy; OpenStreetMap"
+    }).addTo(map);
+    const markerLayer = L.layerGroup().addTo(map);
+
+    // ---------- Load records and draw markers ----------
+    async function loadRecords() {
+      const species = document.getElementById("speciesFilter").value;
+      const isPublic = document.getElementById("publicView").checked;
+      const params = new URLSearchParams();
+      if (species) params.set("species", species);
+      if (isPublic) params.set("view", "public");
+
+      const records = await fetch("/api/records?" + params).then(r => r.json());
+      markerLayer.clearLayers();
+
+      records.forEach(rec => {
+        const marker = L.circleMarker([rec.lat, rec.lng], {
+          radius: rec.alert ? 10 : 7,
+          color: rec.alert ? "#c8401f" : "#3f8f5a",
+          fillColor: rec.alert ? "#c8401f" : "#3f8f5a",
+          fillOpacity: 0.75,
+          weight: 2
+        });
+        const name = SPECIES_NAMES[rec.species] || rec.species;
+        let html = `<b>${name}</b>${rec.count ? " × " + rec.count : ""}` +
+          `<br>${rec.camera} · ${new Date(rec.time).toLocaleString("en-GB")}` +
+          `<br>Confidence ${Math.round(rec.confidence * 100)}%` +
+          (rec.note ? `<br>${rec.note}` : "") +
+          (rec.alert ? `<br><span style="color:#c8401f">⚠ ${rec.alertReason}</span>` : "") +
+          (rec.alertReason && !rec.alert ? `<br><span style="color:#8a6d1f">${rec.alertReason}</span>` : "");
+        if (rec.imageUrl) html += `<img src="${rec.imageUrl}" alt="">`;
+        marker.bindPopup(html);
+        marker.addTo(markerLayer);
+      });
+
+      if (records.length && !species) {
+        map.fitBounds(records.map(r => [r.lat, r.lng]), { padding: [40, 40], maxZoom: 11 });
+      }
+    }
+
+    // ---------- Stats panel ----------
+    async function loadStats() {
+      const s = await fetch("/api/stats").then(r => r.json());
+      document.getElementById("statTotal").textContent = s.total;
+      document.getElementById("statAlerts").textContent = s.alerts;
+
+      const list = document.getElementById("speciesList");
+      const filter = document.getElementById("speciesFilter");
+      const current = filter.value;
+      list.innerHTML = "";
+      filter.innerHTML = '<option value="">All species</option>';
+      Object.entries(s.bySpecies).sort((a, b) => b[1] - a[1]).forEach(([sp, n]) => {
+        const name = SPECIES_NAMES[sp] || sp;
+        list.insertAdjacentHTML("beforeend", `<div>${name} <span style="color:#6b7266">${n}</span></div>`);
+        filter.insertAdjacentHTML("beforeend", `<option value="${sp}">${name}</option>`);
+      });
+      filter.value = current;
+    }
+
+    // ---------- Upload ----------
+    document.getElementById("uploadForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById("submitBtn");
+      const status = document.getElementById("status");
+      btn.disabled = true;
+      status.className = "";
+      status.textContent = "Analyzing — this usually takes a few seconds…";
+
+      try {
+        const res = await fetch("/api/upload", { method: "POST", body: new FormData(e.target) });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Upload failed");
+
+        status.textContent = "Added to the map.";
+        const name = SPECIES_NAMES[data.species] || data.species;
+        document.getElementById("lastResult").innerHTML =
+          `<div class="result ${data.alert ? "alert" : ""}">
+            <b>${name}</b>${data.count ? " × " + data.count : ""} · Confidence ${Math.round(data.confidence * 100)}%<br>
+            ${data.note}<br>
+            ${data.alert ? "⚠ " + data.alertReason : (data.alertReason || "No alert")}
+          </div>`;
+        e.target.querySelector('input[type="file"]').value = "";
+        await Promise.all([loadRecords(), loadStats()]);
+        map.setView([data.lat, data.lng], Math.max(map.getZoom(), 10));
+      } catch (err) {
+        status.className = "err";
+        status.textContent = err.message;
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    document.getElementById("speciesFilter").addEventListener("change", loadRecords);
+    document.getElementById("publicView").addEventListener("change", loadRecords);
+
+    loadRecords();
+    loadStats();
+  </script>
+</body>
+</html>

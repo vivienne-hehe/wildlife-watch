@@ -1,0 +1,6 @@
+filename,species,count,has_human,has_vehicle,is_night
+zebra_day_01.jpg,zebra,2,No,No,No
+buffalo_night_01.jpg,buffalo,1,No,No,Yes
+empty_day_01.jpg,none,0,No,No,No
+human_night_01.jpg,none,0,Yes,No,Yes
+vehicle_day_01.jpg,none,0,No,Yes,No
