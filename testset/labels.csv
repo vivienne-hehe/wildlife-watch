@@ -1,6 +1,6 @@
 File Name,True Species,Count,Has Human,Has Vehicle,Is Night,Reviewed By
 buffalo_day_01.jpg,buffalo,2,No,No,No,Nemo
-buffalo_day_02.jpg,none,5,No,No,No,Nemo
+buffalo_day_02.jpg,buffalo,5,No,No,No,Nemo
 buffalo_day_03.jpg,buffalo,4,No,No,No,Nemo
 buffalo_day_04.jpg,buffalo,1,No,No,No,Nemo
 buffalo_day_05.jpg,buffalo,1,No,No,No,Nemo
@@ -61,7 +61,7 @@ hard_multi_gazellegrants-gazellethomsons_01.jpg,gazellegrants,1,No,No,No,Ellie
 hard_multi_gazellethomsons-hartebeest_01.jpg,gazellethomsons,3,No,No,No,Ellie
 hard_multi_gazellethomsons-hartebeest_02.jpg,gazellethomsons,3,No,No,No,Ellie
 hard_multi_hartebeest-zebra_01.jpg,hartebeest,1,No,No,No,Ellie
-hard_zebra_day_01.jpg,none,0,No,No,Yes,Ellie
+hard_zebra_day_01.jpg,zebra,1,No,No,Yes,Ellie
 hard_zebra_day_02.jpg,zebra,1,No,No,No,Ellie
 hyenaspotted_day_01.jpg,hyenaspotted,1,No,No,No,Ellie
 hyenaspotted_day_02.jpg,hyenaspotted,1,No,No,No,Ellie
@@ -74,18 +74,18 @@ hyenaspotted_night_01.jpg,none,0,No,No,Yes,Ellie
 hyenaspotted_night_02.jpg,hyenaspotted,1,No,No,Yes,Ellie
 hyenaspotted_night_03.jpg,hyenaspotted,1,No,No,Yes,Ellie
 hyenaspotted_night_04.jpg,hyenaspotted,1,No,No,Yes,Ellie
-hyenaspotted_night_05.jpg,none,0,No,No,Yes,Vivienne
+hyenaspotted_night_05.jpg,hyenaspotted,1,No,No,Yes,Vivienne
 warthog_day_01.jpg,warthog,2,No,No,No,Vivienne
 warthog_day_02.jpg,warthog,1,No,No,No,Vivienne
 warthog_day_03.jpg,warthog,2,No,No,No,Vivienne
 warthog_day_04.jpg,warthog,1,No,No,No,Vivienne
 warthog_day_05.jpg,warthog,1,No,No,No,Vivienne
-warthog_day_06.jpg,none,0,No,No,No,Vivienne
+warthog_day_06.jpg,warthog,1,No,No,No,Vivienne
 warthog_day_07.jpg,warthog,1,No,No,No,Vivienne
 warthog_day_08.jpg,warthog,1,No,No,No,Vivienne
-warthog_day_09.jpg,none,0,No,No,No,Vivienne
+warthog_day_09.jpg,warthog,1,No,No,No,Vivienne
 warthog_day_10.jpg,warthog,1,No,No,No,Vivienne
-warthog_day_11.jpg,none,0,No,No,No,Vivienne
+warthog_day_11.jpg,warthog,2,No,No,No,Vivienne
 warthog_night_01.jpg,warthog,1,No,No,No,Vivienne
 zebra_day_01.jpg,zebra,2,No,No,No,Vivienne
 zebra_day_02.jpg,zebra,3,No,No,No,Vivienne
