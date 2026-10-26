@@ -262,3 +262,47 @@ try again."*
   correct, because they let the *browser* decide what to hide, which is exactly
   what the privacy argument says you must not do. Worth saying out loud in the
   report, since it shows the team understood why the first version was wrong.
+
+---
+
+## Part 3 — Second pass: following the page as a student
+
+The first pass asked "would the code break?". This pass asked "would a student
+get stuck?". Seven things, all now fixed on the Notion page.
+
+1. **The rollback instruction did not work.** The page said to undo a bad
+   change with `git checkout .`. That restores files that already existed, but
+   the assistant *creates* files (`services/firebase.js`,
+   `public/species-config.js`, the one-off scripts), and `git checkout .`
+   leaves every one of them in place — so the app stays half-changed and the
+   student thinks the undo failed. Now `git restore .` **and** `git clean -fd`,
+   with a note that `.env` and `serviceAccount.json` survive because git
+   ignores them and `git clean -fd` skips ignored files.
+
+2. **No test could have passed as written: the test images have no GPS.**
+   Public camera-trap datasets strip it for privacy. Checked with `exifr` —
+   `exifr.gps()` returns nothing for them. Every "upload a photo" test would
+   have produced "This photo has no GPS data" and looked like a bug in the
+   feature just built. Added one callout near the top with coordinates to type
+   (-2.33 / 34.83) and a reminder to vary them between uploads.
+
+3. **The team could not all run the app.** 3.1 has one person generate
+   `serviceAccount.json` and says never to share it — with no instruction for
+   anybody else, who each need one locally. Added: once added to the Firebase
+   project, every member generates their own key. A project can hold many, so
+   the secret never travels.
+
+4. **`sharp` was never installed.** The 3.2 prompt said "install
+   firebase-admin" and then used sharp without mentioning it.
+
+5. **The "DELETE returns 403" test had no instructions.** A student cannot run
+   it without being shown how. Added the one-line `fetch(...)` snippet and how
+   to get a sighting id — and it is a good thing to show the judges, since it
+   proves the check is on the server rather than in the page.
+
+6. **The 3.4 privacy test was not observable.** "Markers sit at the exact
+   positions" — a 5 km shift is invisible at the default zoom. Now says to zoom
+   in on one sighting or compare the `lat` values in `/api/records`.
+
+7. **A stale instruction** about replacing `<paste … here>` placeholders, which
+   no longer exist now that the Firebase web config is gone.
