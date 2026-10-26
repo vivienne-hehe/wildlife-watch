@@ -343,11 +343,18 @@ All now updated in Notion.
   is what the design does guarantee. An unprepared team flounders on this.
 - The poaching question now suggests offering to show `/api/records` with no
   passcode, where `precise_lat` is absent. Demonstrable beats assertable.
-- Flagged for preparation: the recorded results have the **full** prompt at
-  58.2% and the **minimal** prompt at 80%. A judge asking "how did the prompt
-  change things?" will notice that the elaborate prompt did worse than the bare
-  one. The team needs an explanation ready, or should say they found it and
-  have not explained it yet.
+- Corrected a swap in the recorded numbers. Step 6's slide-5 script had
+  "80% with the minimal prompt, 58.2% with the full one", which is the two
+  figures the wrong way round. The result files say: minimal **58.2%**
+  (71/122, `minimal-report-10-8.md`), full **80.5%** (99/123,
+  `baseline-report-10-8.md`), improved **82.1%** (101/123,
+  `improved-v3-report.md`). So the story is the straightforward one — writing a
+  real prompt gained 22 points, and the species hints added 1.6 more. Both the
+  slide script and the interview hint now say that.
+- Note for whoever fills in Table 3: use `improved-v3-report.md` as the
+  improved run. `improved-test-report.md` is a partial run (2 images failed, so
+  it scores 121 images) and `mini-report-9-24.md` is a 5-image smoke test.
+  Neither belongs in the report.
 - 7.4's technical check now says to re-test all three passcodes on the live
   site after the final deploy: they come from Vercel environment variables, and
   a redeploy missing one drops that role with no error.
