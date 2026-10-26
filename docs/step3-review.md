@@ -306,3 +306,48 @@ get stuck?". Seven things, all now fixed on the Notion page.
 
 7. **A stale instruction** about replacing `<paste … here>` placeholders, which
    no longer exist now that the Firebase web config is gone.
+
+---
+
+## Part 4 — Steps 5, 6 and 7 brought in line
+
+The passcode decision in 3.3 changes wording in the three downstream steps.
+All now updated in Notion.
+
+**Step 5 (report template)**
+
+- §4's architecture diagram no longer lists Firebase Authentication; it now
+  says to show that the *server* decides what each role receives, since that is
+  the privacy argument in §7.
+- §7 gained a bullet telling the team to state plainly what the shared
+  passcodes do and don't prove.
+- Reference 6 dropped "Firebase Authentication".
+
+**Step 6 (slides and videos)**
+
+- Slide 6's script said "only verified researchers" — which implied account
+  verification we don't do. Now "researchers with the reserve's passcode", plus
+  the point that the server decides.
+- 6.4 step 1 said to sign two test accounts in. Now: two passcodes in two
+  browser *profiles* — the passcode lives in localStorage, which ordinary tabs
+  of one profile share, so two plain tabs would both show the same role and the
+  side-by-side privacy shot would be impossible to film.
+- 6.4 step 5 ("never show") now includes passcodes. These videos are public.
+  Typing one is fine, since the box masks it; filming `.env`, a sticky note or
+  the Vercel settings page is not.
+
+**Step 7 (interview prep)**
+
+- Added the question the passcode design invites: *"How do you know someone is
+  really a researcher?"* The hint says to answer honestly — we don't, and here
+  is what the design does guarantee. An unprepared team flounders on this.
+- The poaching question now suggests offering to show `/api/records` with no
+  passcode, where `precise_lat` is absent. Demonstrable beats assertable.
+- Flagged for preparation: the recorded results have the **full** prompt at
+  58.2% and the **minimal** prompt at 80%. A judge asking "how did the prompt
+  change things?" will notice that the elaborate prompt did worse than the bare
+  one. The team needs an explanation ready, or should say they found it and
+  have not explained it yet.
+- 7.4's technical check now says to re-test all three passcodes on the live
+  site after the final deploy: they come from Vercel environment variables, and
+  a redeploy missing one drops that role with no error.
